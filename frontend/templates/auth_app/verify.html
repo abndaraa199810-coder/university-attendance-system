@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <title>التحقق من الطالب</title>
+  <style>
+    body { font-family: Arial; text-align: center; background: #f4f6f8; }
+    video { border: 2px solid #333; border-radius: 8px; }
+    select, button { padding: 8px; margin: 8px; font-size: 16px; }
+    #result {
+      margin-top: 20px; font-size: 18px; padding: 15px;
+      width: 60%; margin-left: auto; margin-right: auto;
+      border-radius: 6px; display: none;
+    }
+    .success { background: #e6fffa; color: #065f46; border: 1px solid #10b981; }
+    .error { background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; }
+    .warning { background: #fff7ed; color: #9a3412; border: 1px solid #fb923c; }
+    .muted { color: #666; font-size: 13px; margin-top: 6px; }
+  </style>
+</head>
+<body>
+
+<h2>التحقق من هوية الطالب</h2>
+
+<select id="room">
+    <option value="">-- اختر القاعة --</option>
+    {% for r in rooms %}
+        <option value="{{ r.code }}">
+            {{ r.name }} ({{ r.code }})
+        </option>
+    {% endfor %}
+</select>
+
+<div class="muted">اختر رمز القاعة (Room Code) المطابق لقاعدة البيانات</div>
+
+<br>
+
+<video id="video" width="400" height="300" autoplay></video>
+<br><br>
+<button id="btn">تحقق</button>
+
+<div id="result"></div>
+
+<canvas id="canvas" width="400" height="300" style="display:none;"></canvas>
+
+<script>
+  const DEVICE_KEY = "{{ DEVICE_KEY|escapejs }}";
+  console.log("DEVICE_KEY FROM TEMPLATE =", DEVICE_KEY);
+
+  const video = document.getElementById("video");
+  const canvas = document.getElementById("canvas");
+  const resultDiv = document.getElementById("result");
+  const roomSelect = document.getElementById("room");
+  const btn = document.getElementById("btn");
+
+  // تشغيل الكاميرا
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => video.srcObject = stream)
+    .catch(() => alert("تعذر تشغيل الكاميرا، تأكد من صلاحيات المتصفح"));
+
+  function showResult(type, html) {
+    resultDiv.style.display = "block";
+    resultDiv.className = type;
+    resultDiv.innerHTML = html;
+  }
+
+  async function verifyStudent() {
+    const roomCode = roomSelect.value;
+    if (!roomCode) {
+      alert("يرجى اختيار القاعة أولًا");
+      return;
+    }
+
+    // التقط صورة
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imageData = canvas.toDataURL("image/jpeg");
+
+    try {
+      const res = await fetch("/auth/verify/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-DEVICE-KEY": DEVICE_KEY
+        },
+        body: JSON.stringify({
+          room_code: roomCode,
+          image: imageData
+        })
+      });
+
+      const data = await res.json();
+
+      if (data.matched && data.authorized) {
+        showResult("success", `
+          ✅ تم تسجيل الحضور بنجاح<br><br>
+          <b>الاسم:</b> ${data.full_name}<br>
+          <b>الرقم الجامعي:</b> ${data.student_id}<br>
+          🏫 <b>القاعة:</b> ${data.room}<br>
+          🕒 <b>الوقت:</b> ${data.time}<br>
+          📌 <b>الحالة:</b> ${data.status}<br>
+          ⭐ <b>الثقة:</b> ${data.confidence}
+        `);
+      } else if (data.matched && !data.authorized) {
+        showResult("warning", `
+          ⚠️ تم التعرف على الطالب لكن غير مصرح له<br><br>
+          <small>السبب: ${data.reason || "FORBIDDEN"}</small>
+        `);
+      } else {
+        showResult("error", `❌ لم يتم التعرف على الطالب<br><small>${data.error || ""}</small>`);
+      }
+
+    } catch (e) {
+      console.error(e);
+      showResult("error", "⚠️ حدث خطأ في الاتصال بالخادم");
+    }
+  }
+
+  btn.addEventListener("click", verifyStudent);
+</script>
+
+</body>
+</html>

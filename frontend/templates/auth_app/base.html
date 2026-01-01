@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ar">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>{% block title %}Face Attendance{% endblock %}</title>
+  <style>
+    :root{--bg:#f6f8fb;--card:#fff;--accent:#0b5fff;--muted:#666}
+    body{font-family:Inter, system-ui, Arial; background:var(--bg); margin:0; padding:24px; color:#111}
+    .container{max-width:1100px; margin:0 auto}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+    .card{background:var(--card); border-radius:12px; padding:18px; box-shadow:0 6px 18px rgba(20,30,50,0.06)}
+    h1{margin:0;font-size:20px}
+    .row{display:flex;gap:16px}
+    table{width:100%; border-collapse:collapse}
+    thead th{background:#f0f2f7;padding:10px;text-align:left}
+    tbody tr:nth-child(even){background:#fbfbfb}
+    td, th{padding:10px;border-bottom:1px solid #eee}
+    .badge{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:600}
+    .badge.in{background:#e6f6ea;color:#0a7f2f}
+    .badge.out{background:#fff4e6;color:#b36b00}
+    .badge.forbidden{background:#ffe9e9;color:#9b1e1e}
+    .muted{color:var(--muted);font-size:13px}
+    .controls{display:flex;gap:8px;align-items:center}
+    input, select{padding:8px;border-radius:8px;border:1px solid #ddd}
+    button{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
+    .small{font-size:13px;padding:6px 10px}
+    #log{white-space:pre-wrap; font-family:monospace; font-size:13px; color:#333; margin-top:12px}
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body dir="rtl">
+  <div class="container">
+    <header>
+      <div><h1>Face Attendance Dashboard</h1><div class="muted">Authorization & Accounting — تجريبي</div></div>
+      <div class="controls">
+        <a href="{% url 'face' %}"><button class="small">Live Scan</button></a>
+        <a href="{% url 'enroll' %}"><button class="small">Enroll Student</button></a>
+        <button id="refreshBtn" class="small">تحديث</button>
+      </div>
+    </header>
+
+    {% block content %}{% endblock %}
+  </div>
+  <script>
+    document.getElementById('refreshBtn')?.addEventListener('click', ()=>location.reload());
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

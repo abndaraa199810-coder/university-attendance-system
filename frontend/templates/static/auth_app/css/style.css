@@ -1,0 +1,4 @@
+body{font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background:#f4f6f9; color:#222}
+.topbar{background:#0f1724;color:#fff;padding:18px}
+.nav{display:flex;gap:12px;padding:10px}
+.card{background:#fff;padding:20px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.06);width:280px;display:inline-block;margin:10px}

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>نتيجة الحضور</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 400px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #2c7be5;
+        }
+
+        .info {
+            margin-top: 15px;
+            font-size: 18px;
+        }
+
+        .time {
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>✅ تم التعرف على الطالب</h2>
+
+    <div class="info">
+        <strong>الاسم:</strong> {{ full_name }}
+    </div>
+
+    <div class="info">
+        <strong>الرقم الجامعي:</strong> {{ student_id }}
+    </div>
+
+    <div class="time">
+        🕒 وقت الدخول: {{ time }}
+    </div>
+</div>
+
+</body>
+</html>

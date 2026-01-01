@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Face Attendance — Live</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; text-align:center; background:#f6f8fa; padding:24px; }
+    video { width: 480px; height: auto; border-radius:8px; border:2px solid #333; }
+    #status { margin-top:12px; font-size:18px; }
+    #studentBox { margin-top:16px; font-size:20px; font-weight:600; }
+    #success { margin-top:12px; font-size:22px; color:green; font-weight:bold; display:none; }
+    #log { margin-top:10px; color:#666; font-size:14px; }
+  </style>
+</head>
+<body>
+
+<h1>Face Attendance (Live)</h1>
+
+<video id="camera" autoplay playsinline></video>
+
+<div id="status">⏳ Waiting for camera...</div>
+<div id="studentBox"></div>
+<div id="success">✅ تم تسجيل الحضور بنجاح</div>
+<div id="log"></div>
+
+<script>
+(async function () {
+
+  const video = document.getElementById('camera');
+  const status = document.getElementById('status');
+  const studentBox = document.getElementById('studentBox');
+  const successBox = document.getElementById('success');
+  const log = document.getElementById('log');
+
+  let running = false;
+  let lastRecognizedAt = 0;
+
+  // start camera
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
+    status.textContent = "📸 Camera started";
+  } catch (err) {
+    status.textContent = "❌ Camera access denied";
+    return;
+  }
+
+  function captureFrame() {
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0);
+    return canvas.toDataURL('image/jpeg', 0.8);
+  }
+
+  function addLog(msg) {
+    const t = new Date().toLocaleTimeString();
+    log.innerText = `[${t}] ${msg}\n` + log.innerText;
+  }
+
+  async function scanOnce() {
+    if (running) return;
+    running = true;
+
+    const image = captureFrame();
+    status.textContent = "🔎 Scanning...";
+    successBox.style.display = "none";
+
+    try {
+      const res = await fetch('/auth/verify_face/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image })
+      });
+
+      const data = await res.json();
+
+      if (data.error) {
+        status.textContent = "❌ Error";
+        addLog(data.error);
+      }
+      else if (data.matched) {
+        studentBox.textContent = `👤 ${data.student?.name || 'Student'} (${data.student?.student_id || ''})`;
+
+        if (data.status === "attendance_added") {
+          successBox.style.display = "block";
+          status.textContent = "✅ Attendance recorded";
+          addLog("Attendance added successfully");
+          lastRecognizedAt = Date.now();
+        } else {
+          status.textContent = "⚠ Already attended";
+        }
+      }
+      else {
+        status.textContent = "❌ No match";
+        studentBox.textContent = "";
+      }
+
+    } catch (err) {
+      status.textContent = "❌ Network error";
+      addLog("Network / fetch error");
+    }
+    finally {
+      running = false;
+    }
+  }
+
+  setInterval(() => {
+    if (!video.srcObject) return;
+    if (Date.now() - lastRecognizedAt < 8000) return;
+    scanOnce();
+  }, 2000);
+
+})();
+</script>
+
+</body>
+</html>

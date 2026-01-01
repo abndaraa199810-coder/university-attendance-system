@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>تسجيل طالب</title>
+    <style>
+        body { font-family: Arial; text-align: center; }
+        video, canvas { border: 1px solid #333; }
+        input { margin: 5px; padding: 5px; }
+        .hint { color: #666; font-size: 13px; margin-top: 8px; }
+    </style>
+</head>
+<body>
+
+<h2>تسجيل طالب جديد</h2>
+
+<input id="student_id" placeholder="رقم الطالب"><br>
+<input id="full_name" placeholder="الاسم الكامل"><br>
+<div class="hint">ملاحظة: يجب أن يكون الوجه واضحًا وبوجود وجه واحد فقط</div>
+<br>
+
+<video id="video" width="320" height="240" autoplay></video><br><br>
+<button onclick="capture()">📸 التقاط صورة</button>
+
+<canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+
+<script>
+const DEVICE_KEY = "{{ DEVICE_KEY|escapejs }}"; // نفس القيمة الموجودة في .env (DEVICE_KEY)
+console.log("DEVICE_KEY FROM TEMPLATE =", DEVICE_KEY);
+
+
+const video = document.getElementById("video");
+navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => video.srcObject = stream)
+    .catch(() => alert("تعذر تشغيل الكاميرا، تأكد من صلاحيات المتصفح"));
+
+function capture() {
+    const student_id = document.getElementById("student_id").value.trim();
+    const full_name = document.getElementById("full_name").value.trim();
+
+    if (!student_id || !full_name) {
+        alert("يرجى إدخال رقم الطالب والاسم الكامل");
+        return;
+    }
+
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const image = canvas.toDataURL("image/jpeg");
+
+    fetch("/auth/enroll-face/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-DEVICE-KEY": DEVICE_KEY
+        },
+        body: JSON.stringify({
+            student_id: student_id,
+            full_name: full_name,
+            image: image
+        })
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            alert("✅ تم تسجيل الطالب بنجاح");
+        } else {
+            alert("❌ خطأ: " + (d.error || "Unknown error"));
+        }
+    })
+    .catch(() => {
+        alert("⚠️ حدث خطأ في الاتصال بالخادم");
+    });
+}
+</script>
+
+</body>
+</html>

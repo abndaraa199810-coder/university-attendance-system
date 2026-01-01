@@ -1,0 +1,99 @@
+{% extends "auth_app/base.html" %}
+{% block title %}Dashboard - Attendance{% endblock %}
+
+{% block content %}
+<div class="row" style="margin-bottom:16px">
+  <div class="card" style="flex:1">
+    <h3>مُلخص اليوم</h3>
+    <div id="summary" class="muted">جاري التحميل...</div>
+  </div>
+
+  <div class="card" style="width:340px">
+    <h3>بحث / فلترة</h3>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <input id="qName" placeholder="اسم الطالب"/>
+      <select id="qStatus">
+        <option value="">كل الحالات</option>
+        <option value="IN">IN</option>
+        <option value="OUT">OUT</option>
+        <option value="FORBIDDEN">FORBIDDEN</option>
+      </select>
+      <button id="apply" class="small">اعرض</button>
+    </div>
+    <div id="smallHint" class="muted" style="margin-top:10px">تحديث تلقائي كل 5 ثواني</div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>سجل الحضور</h3>
+  <table id="attTable">
+    <thead>
+      <tr><th>الوقت</th><th>الطالب</th><th>الرقم الجامعي</th><th>القاعة</th><th>الحالة</th><th>الثقة</th></tr>
+    </thead>
+    <tbody id="attBody">
+      <tr><td colspan="6" class="muted">تحميل...</td></tr>
+    </tbody>
+  </table>
+  <div id="log" aria-hidden="true"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function fetchAttendance(qname='', status=''){
+  try{
+    let url = '/auth/api/attendance/'; // سنتأكد من هذا المسار في views.py
+    let params = new URLSearchParams();
+    if(qname) params.set('q', qname);
+    if(status) params.set('status', status);
+    if([...params].length) url += '?' + params.toString();
+
+    const res = await fetch(url);
+    const data = await res.json();
+    renderTable(data);
+  }catch(e){
+    document.getElementById('attBody').innerHTML = `<tr><td colspan="6" class="muted">خطأ في جلب البيانات</td></tr>`;
+    console.error(e);
+  }
+}
+
+function renderTable(data){
+  const body = document.getElementById('attBody');
+  if(!data || data.length===0){
+    body.innerHTML = `<tr><td colspan="6" class="muted">لا توجد سجلات</td></tr>`;
+    document.getElementById('summary').innerText = 'لا توجد بيانات اليوم';
+    return;
+  }
+  body.innerHTML = '';
+  let inCount = 0, outCount = 0, forb=0;
+  data.forEach(r=>{
+    const tr = document.createElement('tr');
+    const d = new Date(r.timestamp);
+    const t = d.toLocaleString();
+    let badge = '<span class="badge '+ (r.status==='IN' ? 'in' : (r.status==='OUT'?'out':'forbidden')) +'">'+ r.status +'</span>';
+    if(r.status==='IN') inCount++;
+    if(r.status==='OUT') outCount++;
+    if(r.status==='FORBIDDEN') forb++;
+    tr.innerHTML = `<td>${t}</td>
+                    <td>${r.student_name || r.student?.name || '-'}</td>
+                    <td>${r.student_id || (r.student?.id||'-')}</td>
+                    <td>${r.room_name || r.room || '-'}</td>
+                    <td>${badge}</td>
+                    <td>${(r.confidence||0).toFixed(2)}</td>`;
+    body.appendChild(tr);
+  });
+  document.getElementById('summary').innerText = `IN: ${inCount}  •  OUT: ${outCount}  •  FORBIDDEN: ${forb}  •  Total: ${data.length}`;
+}
+
+document.getElementById('apply').addEventListener('click', ()=>{
+  const name = document.getElementById('qName').value.trim();
+  const status = document.getElementById('qStatus').value;
+  fetchAttendance(name, status);
+});
+
+// initial load
+fetchAttendance();
+// auto refresh
+setInterval(()=>{ fetchAttendance(document.getElementById('qName').value.trim(), document.getElementById('qStatus').value); }, 5000);
+</script>
+{% endblock %}
