@@ -10,7 +10,7 @@ def backup_and_audit_attendance(sender, instance, created, **kwargs):
     if not created:
         return
 
-    # Backup
+  
     AttendanceBackup.objects.create(
         original_attendance_id=instance.id,
         student_id=instance.student.student_id,
@@ -19,7 +19,7 @@ def backup_and_audit_attendance(sender, instance, created, **kwargs):
         timestamp=instance.timestamp
     )
 
-    # Audit
+   
     AuditLog.objects.create(
         action="ATTENDANCE_BACKUP_CREATED",
         username=instance.student.student_id,
