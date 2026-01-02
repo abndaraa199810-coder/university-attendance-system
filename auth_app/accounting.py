@@ -15,10 +15,7 @@ def log_attempt(request, action, data=None):
         "data": data or {}
     }
 
-    # IMPORTANT: أنت عندك signature داخل AuditLog.save()
-    # لكن created_at يتولد بعد الحفظ -> الأفضل نمرر time ونستخدمه في signature
-    # الحل الأسهل: خزّن الوقت داخل data واستخدمه في payload (كما هنا)
-    # واعتبر signature مجرد Tamper-evident على مستوى الـ action/log
+ 
 
     AuditLog.objects.create(
         action=action,
