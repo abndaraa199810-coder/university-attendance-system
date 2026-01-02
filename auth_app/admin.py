@@ -14,9 +14,7 @@ from .models import (
     Enrollment,
 )
 
-# ==========================
-# 👤 User & Profile
-# ==========================
+
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = ("username", "full_name", "role", "is_staff")
@@ -30,9 +28,7 @@ class ProfileAdmin(admin.ModelAdmin):
     search_fields = ("full_name",)
 
 
-# ==========================
-# 🎓 Students
-# ==========================
+
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
     list_display = ("student_id", "full_name", "has_face", "created_at")
@@ -40,9 +36,7 @@ class StudentAdmin(admin.ModelAdmin):
     list_filter = ("created_at",)
 
 
-# ==========================
-# 🏫 Rooms
-# ==========================
+
 @admin.register(Room)
 class RoomAdmin(admin.ModelAdmin):
     list_display = ("name", "code")
@@ -55,9 +49,6 @@ class RoomAccessAdmin(admin.ModelAdmin):
     list_filter = ("allowed",)
 
 
-# ==========================
-# 🕒 Attendance
-# ==========================
 @admin.register(Attendance)
 class AttendanceAdmin(admin.ModelAdmin):
     list_display = ("student", "room", "status", "confidence", "timestamp")
@@ -71,9 +62,6 @@ class AttendanceBackupAdmin(admin.ModelAdmin):
     list_display = ("original_attendance_id", "student_id", "status", "backup_time")
 
 
-# ==========================
-# 🛡 Audit Logs
-# ==========================
 @admin.register(AuditLog)
 class AuditLogAdmin(admin.ModelAdmin):
     list_display = ("action", "username", "ip_address", "created_at")
@@ -81,9 +69,7 @@ class AuditLogAdmin(admin.ModelAdmin):
     readonly_fields = ("signature",)
 
 
-# ==========================
-# 📚 Courses
-# ==========================
+
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
     list_display = ("code", "name")
