@@ -24,7 +24,6 @@ from .serializers import RegisterSerializer, LoginSerializer
 from .authorization import authorize_student
 from .accounting import log_attempt
 
-# حاول استيراد ArcFace engine (قد يفشل لو لم يكن الملف موجوداً)
 try:
     from face_service.engine_onnx import ArcFaceONNX, cosine_similarity
 except Exception:
@@ -35,9 +34,7 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
-# ==========================================================
-# ✅ Lazy-load ArcFace (حتى لا ينهار makemigrations)
-# ==========================================================
+=====
 MODEL_PATH = getattr(settings, "ARCFACE_MODEL_PATH", "")
 _ARCFACE = None
 
@@ -64,16 +61,12 @@ def get_arcface():
         return None
 
 
-# ==========================================================
-# 🔐 Device key check (اختياري حسب .env)
-# ==========================================================
+
 def require_device_key(request, action_name="DEVICE_CHECK"):
-    """
-    إذا DEVICE_KEY موجود في settings/.env، نطلب هيدر X-DEVICE-KEY.
-    """
+ 
     required_key = getattr(settings, "DEVICE_KEY", "")
     if not required_key:
-        return True  # غير مفعل
+        return True   
 
     sent_key = request.headers.get("X-DEVICE-KEY") or request.META.get("HTTP_X_DEVICE_KEY") or ""
     if sent_key.strip() != str(required_key).strip():
@@ -83,9 +76,7 @@ def require_device_key(request, action_name="DEVICE_CHECK"):
     return True
 
 
-# ==========================================================
-# 👤 Register / Login
-# ==========================================================
+
 class RegisterView(APIView):
     permission_classes = [AllowAny]
 
@@ -117,10 +108,7 @@ class LoginView(APIView):
         return Response({"token": token.key})
 
 
-# ==========================================================
-# 🧑‍🎓 ENROLL (Register Face -> ArcFace Embedding)
-# URL: /auth/enroll-face/
-# ==========================================================
+
 @csrf_exempt
 def enroll_face(request):
     if request.method != "POST":
@@ -144,9 +132,7 @@ def enroll_face(request):
     if not image_data or not student_id or not full_name:
         return JsonResponse({"success": False, "error": "Missing data"}, status=400)
 
-    # ===============================
-    # Decode base64 image
-    # ===============================
+   
     try:
         header, encoded = image_data.split(",", 1)
         img_bytes = base64.b64decode(encoded)
@@ -157,23 +143,16 @@ def enroll_face(request):
     except Exception:
         return JsonResponse({"success": False, "error": "Bad image format"}, status=400)
 
-    # ===============================
-    # Convert to RGB (IMPORTANT)
-    # ===============================
+   
     rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
 
-    # ===============================
-    # Generate embedding
-    # ===============================
+   
     try:
         embedding = arc.embed_from_rgb(rgb)
     except Exception as e:
         log_attempt(request, "ENROLL_FAILED", {"reason": "NO_FACE", "error": repr(e)})
         return JsonResponse({"success": False, "error": "No face detected"}, status=200)
 
-    # ===============================
-    # Save student
-    # ===============================
     student, created = Student.objects.update_or_create(
         student_id=student_id,
         defaults={
@@ -195,10 +174,7 @@ def enroll_face(request):
         "message": "Student enrolled successfully"
     })
 
-# ==========================================================
-# 🧠 VERIFY (Face -> Match -> Authorization -> Attendance)
-# URL: /auth/verify/
-# ==========================================================
+
 @csrf_exempt
 def verify(request):
     if request.method != "POST":
@@ -317,9 +293,7 @@ def verify(request):
     return JsonResponse({"matched": False, "error": "Face not matched"}, status=200)
 
 
-# ==========================================================
-# 📊 Attendance API
-# ==========================================================
+
 def attendance_api(request):
     qname = request.GET.get("q", "").strip()
     status_q = request.GET.get("status", "").strip()
@@ -350,9 +324,6 @@ def attendance_api(request):
     return JsonResponse(data, safe=False)
 
 
-# ==========================================================
-# 🖥 Pages
-# ==========================================================
 def face_page(request):
     return render(request, "auth_app/face.html")
 
