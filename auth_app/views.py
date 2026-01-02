@@ -1,4 +1,3 @@
-# auth_app/views.py
 import base64
 import json
 import logging
