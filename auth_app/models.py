@@ -8,9 +8,7 @@ from cryptography.fernet import Fernet
 from django.shortcuts import redirect
 
 
-# ================================
-# 🔐 Secure keys (SAFE / Lazy)
-# ================================
+
 FERNET_KEY_RAW = os.environ.get("FERNET_KEY")
 HMAC_SECRET_RAW = os.environ.get("HMAC_SECRET", "")
 
@@ -18,10 +16,7 @@ HMAC_SECRET = (HMAC_SECRET_RAW or "").encode("utf-8")
 
 
 def get_fernet():
-    """
-    Lazy Fernet initialization.
-    Prevents Django from crashing if key is missing or invalid.
-    """
+
     if not FERNET_KEY_RAW:
         return None
     try:
@@ -30,9 +25,7 @@ def get_fernet():
         return None
 
 
-# ================================
-# 🔐 Encryption helpers
-# ================================
+
 def encrypt_text(text: str):
     f = get_fernet()
     if not text or not f:
@@ -54,9 +47,7 @@ def hmac_signature(payload: str):
         hashlib.sha256
     ).hexdigest()
 
-# ==================================
-# 🎭 Custom User
-# ==================================
+
 class User(AbstractUser):
     full_name = models.CharField(max_length=255, blank=True, null=True)
 
@@ -74,9 +65,7 @@ class User(AbstractUser):
         return self.username
 
 
-# ==================================
-# 📝 Profile
-# ==================================
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     full_name = models.CharField(max_length=255)
@@ -90,9 +79,7 @@ class Profile(models.Model):
 
 
 
-# ==================================
-# 🎓 Student
-# ==================================
+
 class Student(models.Model):
     student_id = models.CharField(max_length=50, unique=True)
     full_name = models.CharField(max_length=255)
@@ -110,9 +97,7 @@ class Student(models.Model):
         return self.face_encoding is not None
 
 
-# ==================================
-# 🏫 Room
-# ==================================
+
 class Room(models.Model):
     name = models.CharField(max_length=120)
     code = models.CharField(max_length=60, unique=True)
@@ -122,9 +107,6 @@ class Room(models.Model):
         return f"{self.name} ({self.code})"
 
 
-# ==================================
-# 🔐 Room Access Control
-# ==================================
 class RoomAccess(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
@@ -136,9 +118,7 @@ class RoomAccess(models.Model):
         unique_together = ("student", "room")
 
 
-# ==================================
-# 🕒 Attendance
-# ==================================
+
 class Attendance(models.Model):
     STATUS_CHOICES = [
         ("IN", "Check In"),
@@ -161,9 +141,7 @@ class Attendance(models.Model):
         super().save(*args, **kwargs)
 
 
-# ==================================
-# 🛡 Audit Log
-# ==================================
+
 
 class AuditLog(models.Model):
     action = models.CharField(max_length=150)
@@ -198,9 +176,6 @@ class AttendanceBackup(models.Model):
 
 
 
-# ==================================
-# 📚 Course (المادة)
-# ==================================
 class Course(models.Model):
     code = models.CharField(max_length=20)
     name = models.CharField(max_length=200)
@@ -209,9 +184,7 @@ class Course(models.Model):
         return f"{self.code} - {self.name}"
 
 
-# ==================================
-# 🗓 Course Session (محاضرة)
-# ==================================
+
 class CourseSession(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     room = models.ForeignKey("Room", on_delete=models.CASCADE)
@@ -222,9 +195,6 @@ class CourseSession(models.Model):
         return f"{self.course.code} | {self.room.code}"
 
 
-# ==================================
-# 🧑‍🎓 Enrollment (تسجيل مادة)
-# ==================================
 class Enrollment(models.Model):
     student = models.ForeignKey("Student", on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
