@@ -1,15 +1,12 @@
-# auth_app/utils.py
 import base64
 import os
 from django.conf import settings
 from cryptography.fernet import Fernet, InvalidToken
 import hmac, hashlib, json
 
-# استخدم متغير بيئة أو إعداد في settings.py
-# إذا لم يكن موجودًا نولّد مفتاح مؤقت (غير مناسب للإنتاج)
+
 FERNET_KEY = getattr(settings, "FERNET_KEY", None)
 if not FERNET_KEY:
-    # لا تنشئ هذا في production — احفظ FERNET_KEY في env أو .env
     FERNET_KEY = base64.urlsafe_b64encode(hashlib.sha256(str(settings.SECRET_KEY).encode()).digest())
 
 fernet = Fernet(FERNET_KEY)
@@ -28,7 +25,6 @@ def decrypt_text(token: str) -> str:
     except InvalidToken:
         return None
 
-# HMAC signing for attendance/audit
 AUDIT_SECRET = getattr(settings, "AUDIT_SECRET_KEY", None)
 if AUDIT_SECRET and isinstance(AUDIT_SECRET, str):
     AUDIT_SECRET = AUDIT_SECRET.encode("utf-8")
