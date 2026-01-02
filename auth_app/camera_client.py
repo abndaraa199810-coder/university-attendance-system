@@ -5,8 +5,8 @@ import time
 
 # CONFIG
 API_URL = "http://127.0.0.1:8000/auth/verify-face/"
-TOKEN = "PUT_YOUR_TOKEN_HERE"  # احصل على التوكن من /auth/login/
-ROOM_CODE = "1234"             # اختياري: كود القاعة
+TOKEN = "PUT_YOUR_TOKEN_HERE"  
+ROOM_CODE = "1234"            
 
 headers = {
     "Authorization": f"Token {TOKEN}"
