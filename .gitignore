@@ -31,3 +31,11 @@ Thumbs.db
 
 # Migrations cache
 **/migrations/__pycache__/
+
+
+# Backups / runtime exports
+backups/
+attendance_backup.json
+
+# ML models (large files)
+face_service/*.onnx

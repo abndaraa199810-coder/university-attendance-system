@@ -4,13 +4,19 @@
 This project presents a network-based software architecture for managing university attendance using **Face Recognition (ArcFace)** technology.  
 The system aims to automate attendance verification securely and efficiently within lecture halls and laboratories.
 
+The project is developed as part of a university graduation requirement focusing on secure biometric-based attendance systems.
+
+
 ##  Core Technologies
 - **Backend:** Django (Python)
 - **Face Recognition:** ArcFace (ONNX)
 - **Face Detection:** MediaPipe + OpenCV (fallback)
+
 - **Database:** SQLite (development)
 - **Frontend:** HTML, CSS, JavaScript
 - **Security:** Device Key Authorization
+- **Database:** SQLite (Development), PostgreSQL (Optional / Production-ready)
+
 
 ##  System Architecture
 The system follows a modular architecture consisting of:
@@ -44,3 +50,9 @@ UNIVERSITY_ATTENDANCE_SYSTEM/
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
+
+
+##  Run the System
+```bash
+python manage.py runserver
+Open browser at: http://127.0.0.1:8000/

@@ -84,7 +84,7 @@ class Student(models.Model):
     student_id = models.CharField(max_length=50, unique=True)
     full_name = models.CharField(max_length=255)
 
-    photo = models.ImageField(upload_to="students/", null=True, blank=True)
+    photo = models.FileField(upload_to="students/", null=True, blank=True)
     face_encoding = models.BinaryField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
