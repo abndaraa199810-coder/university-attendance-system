@@ -29,19 +29,36 @@
   </style>
   {% block head %}{% endblock %}
 </head>
+
 <body dir="rtl">
   <div class="container">
     <header>
-      <div><h1>Face Attendance Dashboard</h1><div class="muted">Authorization & Accounting — تجريبي</div></div>
+      <div>
+        <h1>Face Attendance Dashboard</h1>
+        <div class="muted">Authorization & Accounting — تجريبي</div>
+      </div>
+
       <div class="controls">
-        <a href="{% url 'face' %}"><button class="small">Live Scan</button></a>
-        <a href="{% url 'enroll' %}"><button class="small">Enroll Student</button></a>
+        <a href="{% url 'attendance_page' %}">
+          <button class="small">Live Scan</button>
+        </a>
+
+        <a href="{% url 'enroll_page' %}">
+          <button class="small">Enroll Student</button>
+        </a>
+
+       
+        <a href="{% url 'verify_page' %}">
+          <button class="small">Verify</button>
+        </a>
+
         <button id="refreshBtn" class="small">تحديث</button>
       </div>
     </header>
 
     {% block content %}{% endblock %}
   </div>
+
   <script>
     document.getElementById('refreshBtn')?.addEventListener('click', ()=>location.reload());
   </script>
