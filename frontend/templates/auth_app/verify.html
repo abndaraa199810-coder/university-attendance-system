@@ -93,13 +93,13 @@
 
       if (data.matched && data.authorized) {
         showResult("success", `
-          ✅ تم تسجيل الحضور بنجاح<br><br>
+           تم تسجيل الحضور بنجاح<br><br>
           <b>الاسم:</b> ${data.full_name}<br>
           <b>الرقم الجامعي:</b> ${data.student_id}<br>
-          🏫 <b>القاعة:</b> ${data.room}<br>
-          🕒 <b>الوقت:</b> ${data.time}<br>
-          📌 <b>الحالة:</b> ${data.status}<br>
-          ⭐ <b>الثقة:</b> ${data.confidence}
+           <b>القاعة:</b> ${data.room}<br>
+           <b>الوقت:</b> ${data.time}<br>
+           <b>الحالة:</b> ${data.status}<br>
+           <b>الثقة:</b> ${data.confidence}
         `);
       } else if (data.matched && !data.authorized) {
         showResult("warning", `
