@@ -42,7 +42,7 @@
 <script>
 async function fetchAttendance(qname='', status=''){
   try{
-    let url = '/auth/api/attendance/'; // سنتأكد من هذا المسار في views.py
+    let url = '/auth/attendance/'; // ✅ المسار الصحيح
     let params = new URLSearchParams();
     if(qname) params.set('q', qname);
     if(status) params.set('status', status);
