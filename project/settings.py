@@ -28,6 +28,7 @@ FERNET_KEY_RAW = env("FERNET_KEY", default=None)
 FERNET_KEY = FERNET_KEY_RAW.encode("utf-8") if FERNET_KEY_RAW else None
 HMAC_SECRET = env("HMAC_SECRET", default="")  
 SIEM_ENDPOINT = env("SIEM_ENDPOINT", default="")
+DEFAULT_PERMISSION_CLASSES = (IsAuthenticated,)
 
 
 INSTALLED_APPS = [
