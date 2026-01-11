@@ -17,6 +17,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate, get_user_model
+from rest_framework.decorators import api_view, permission_classes
 
 from .models import Student, Room, Attendance
 from .serializers import RegisterSerializer, LoginSerializer
@@ -33,7 +34,7 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
-=====
+
 MODEL_PATH = getattr(settings, "ARCFACE_MODEL_PATH", "")
 _ARCFACE = None
 
@@ -292,7 +293,8 @@ def verify(request):
     return JsonResponse({"matched": False, "error": "Face not matched"}, status=200)
 
 
-
+@api_view(["GET"])
+@permission_classes([AllowAny])
 def attendance_api(request):
     qname = request.GET.get("q", "").strip()
     status_q = request.GET.get("status", "").strip()
