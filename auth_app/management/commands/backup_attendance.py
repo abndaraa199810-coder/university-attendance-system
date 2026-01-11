@@ -8,7 +8,6 @@ class Command(BaseCommand):
     help = "Create automatic backup for Attendance table"
 
     def handle(self, *args, **kwargs):
-        # اسم الملف مع التاريخ
         timestamp = timezone.now().strftime("%Y%m%d_%H%M%S")
         backup_dir = "backups"
 
